@@ -78,11 +78,11 @@
 	<script src="../src/breilabs_favorites.js"></script>
 	<script>
 
-		$(function() {
+		$(function () {
 
 			var favorites = breilabs.favorites.init({
-				apiRoot: './',
-				getApiUrl: 'getjsondata.json',
+				apiRoot: 'http://wwwstaging-corpus-qa1.ec2.breilabs.com/',
+				//getApiUrl: 'getjsondata.json',
 				favoriteToggleFunc: toggleFavoriteStatus
 			});
 

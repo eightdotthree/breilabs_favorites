@@ -11,13 +11,13 @@ var breilabs = breilabs || {};
 
 	// api urls
 	var _apiRoot = '/';
-	var _getApiUrl = '/getjsondata.ashx?id=29';
-	var _saveApiUrl = '/RemoveFavorite.ashx';
-	var _removeApiUrl = '/SaveFavorite.ashx';
+	var _getApiUrl = 'getjsondata.ashx?id=29';
+	var _saveApiUrl = 'SaveFavorite.ashx';
+	var _removeApiUrl = 'RemoveFavorite.ashx';
 
 	var _isFavoriteClass = 'brei-is-favorite';
 	var _favoritesStatusClass = 'brei-favorites-status';
-	var _favoritesArray;
+	var _favoritesArray = [];
 	var _favoriteToggleFunc;
 
 	/**
@@ -34,15 +34,21 @@ var breilabs = breilabs || {};
 			if (isFavorite) {
 
 				// if this is already a favorite, remove it
-				favorites.removeFavorite(id).then(function () {
+				favorites.removeFavorite(id).then(function (data) {
 
-					$btn.removeClass(hasFavClass);
+					if (data === 'success=true') {
 
-					_removeFavoriteFromArray(id);
-					_updateStatus();
+						$btn.removeClass(hasFavClass);
 
-					if (_favoriteToggleFunc) {
-						_favoriteToggleFunc.call(undefined, REMOVED_STATUS, $btn);
+						_removeFavoriteFromArray(id);
+						_updateStatus();
+
+						if (_favoriteToggleFunc) {
+							_favoriteToggleFunc.call(undefined, REMOVED_STATUS, $btn);
+						}
+
+					} else {
+						window.alert('There was an error removing your favorite. Please try again.');
 					}
 
 				}, function (error) {
@@ -53,15 +59,21 @@ var breilabs = breilabs || {};
 			} else {
 
 				// if it's already not a favorite, add it
-				favorites.addFavorite(id).then(function () {
+				favorites.addFavorite(id).then(function (data) {
 
-					$btn.addClass(hasFavClass);
+					if (data === 'success=true') {
 
-					_favoritesArray.push({ID: id});
-					_updateStatus();
+						$btn.addClass(hasFavClass);
 
-					if (_favoriteToggleFunc) {
-						_favoriteToggleFunc.call(undefined, ADDED_STATUS, $btn);
+						_favoritesArray.push({ID: id});
+						_updateStatus();
+
+						if (_favoriteToggleFunc) {
+							_favoriteToggleFunc.call(undefined, ADDED_STATUS, $btn);
+						}
+
+					} else {
+						window.alert('There was an error adding your favorite. Please try again.');
 					}
 
 				}, function (error) {
@@ -133,10 +145,13 @@ var breilabs = breilabs || {};
 
 		favorites.getFavorites().then(function (data) {
 
-			_favoritesArray = data.ArrayOfFavoriteItem.FavoriteItem;
+			if (data.ArrayOfFavoriteItem != null) {
+				_favoritesArray = data.ArrayOfFavoriteItem.FavoriteItem;
+				_addUiEvents();
+				_updateStatusByCountingUp();
+			} else {
 
-			_addUiEvents();
-			_updateStatusByCountingUp();
+			}	_addUiEvents();
 
 		}, function (error) {
 			console.error(error);
@@ -145,8 +160,15 @@ var breilabs = breilabs || {};
 	};
 
 
+	function _showAlert(alert) {
+
+	}
+
+
 	/**
+	 *
 	 * Public functions
+	 *
 	 */
 
 
@@ -199,7 +221,9 @@ var breilabs = breilabs || {};
 
 		var promise = $.ajax({
 			url: _apiRoot + _saveApiUrl,
-			itemid: id
+			data: {
+				itemid: id
+			}
 		});
    		return promise;
 
@@ -212,7 +236,9 @@ var breilabs = breilabs || {};
 
 		var promise = $.ajax({
 			url: _apiRoot + _removeApiUrl,
-			itemid: id
+			data: {
+				itemid: id
+			}
 		});
    		return promise;
 
@@ -224,7 +250,9 @@ var breilabs = breilabs || {};
    	favorites.getFavorites = function() {
 
 	 	var promise = $.ajax({
-	 		url: _apiRoot + _getApiUrl
+	 		url: _apiRoot + _getApiUrl,
+	 		dataType: 'jsonp',
+	 		jsonp: 'callback'
 	 	});
 		return promise;
 
