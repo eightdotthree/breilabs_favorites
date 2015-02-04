@@ -1,0 +1,26 @@
+jQuery213007260666904039681_1423005078282(
+{
+"ArrayOfFavoriteItem": {
+"FavoriteItem": {
+"Type": "Listing",
+"ID": "115",
+"Title": "Shell Lake Resort",
+"SubType": "1",
+"Address1": "25607 County Hwy 37",
+"Address2": null,
+"City": "Detroit Lakes",
+"State": "MN",
+"Zip": "56501",
+"Phone": "218-847-6726",
+"FriendlyUrl": "115/shell-lake-resort",
+"FriendlyUrlRoot": "/places-to-stay/"
+},
+"Parameters": {
+"Parameter": {
+"attrkey": "contextTree",
+"attrvalue": "||"
+}
+}
+}
+}
+)

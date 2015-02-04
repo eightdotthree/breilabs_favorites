@@ -81,8 +81,10 @@
 		$(function () {
 
 			var favorites = breilabs.favorites.init({
-				apiRoot: 'http://wwwstaging-corpus-qa1.ec2.breilabs.com/',
-				//getApiUrl: 'getjsondata.json',
+				//apiRoot: 'http://wwwstaging-corpus-qa1.ec2.breilabs.com/',
+				apiRoot: '/',
+				getApiUrl: 'demo/getjsondata-one.json',
+				//getApiUrl: 'demo/getjsondata.json',
 				favoriteToggleFunc: toggleFavoriteStatus
 			});
 
