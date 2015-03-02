@@ -38,13 +38,13 @@
 	  			<h2>Add or Remove</h2>
 	  			<p>Once the favorites load, the disabled status on the button is removed and click events are added.</p>
 	  			<div class="btn-group" role="group">
-					<button type="button" class="brei-favorite-btn button disabled" data-id="10665">
+					<button type="button" class="brei-favorite-btn button disabled" data-rei-favorite="10665">
 						Add Favorite (10665)
 					</button>
-					<button type="button" class="brei-favorite-btn button disabled" data-id="66">
+					<button type="button" class="brei-favorite-btn button disabled" data-rei-favorite="66&amp;type=2">
 						Add Favorite (66)
 					</button>
-					<button type="button" class="brei-favorite-btn button disabled" data-id="87">
+					<button type="button" class="brei-favorite-btn button disabled" data-rei-favorite="87">
 						Add Favorite (87)
 					</button>
 				</div>
@@ -56,16 +56,16 @@
 	  			<h2>Has Favorite</h2>
 	  			<p>Checks if a favorite has alredy been added.</p>
 	  			<div class="btn-group" role="group">
-					<button type="button" class="has-favorite-btn button" data-id="13">
+					<button type="button" class="has-favorite-btn button" data-rei-favorite="13">
 						Has Favorite (13)
 					</button>
-					<button type="button" class="has-favorite-btn button" data-id="10665">
+					<button type="button" class="has-favorite-btn button" data-rei-favorite="10665">
 						Has Favorite (10665)
 					</button>
-					<button type="button" class="has-favorite-btn button" data-id="87">
+					<button type="button" class="has-favorite-btn button" data-rei-favorite="87">
 						Has Favorite (87)
 					</button>
-					<button type="button" class="has-favorite-btn button" data-id="187">
+					<button type="button" class="has-favorite-btn button" data-rei-favorite="187">
 						Has Favorite (187)
 					</button>
 				</div>
@@ -81,10 +81,10 @@
 		$(function () {
 
 			var favorites = breilabs.favorites.init({
-				//apiRoot: 'http://wwwstaging-corpus-qa1.ec2.breilabs.com/',
-				apiRoot: '/',
-				getApiUrl: 'demo/getjsondata-one.json',
-				//getApiUrl: 'demo/getjsondata.json',
+				apiRoot: 'http://wwwstaging-corpus-qa1.ec2.breilabs.com/',
+				//apiRoot: '/',
+				//getApiUrl: 'demo/getjsondata-one.json',
+				getApiUrl: 'getjsondata.ashx?id=28',
 				favoriteToggleFunc: toggleFavoriteStatus
 			});
 
