@@ -18,19 +18,34 @@ var breilabs = breilabs || {};
 	var _isFavoriteClass = 'brei-is-favorite';
 	var _favoritesStatusClass = 'brei-favorites-status';
 	var _favoriteBtnClass = 'brei-favorite-btn';
+
 	var _favoritesArray = [];
 	var _favoriteToggleFunc;
+
+	var _loadingFavorites = false;
 
 	/**
 	 * Sets up the UI.
 	 */
 	function _addUiEvents() {
 
+		//console.group('_addUiEvents');
+
 		$('.' + _favoriteBtnClass).each(function(i, item) {
 
 			var $btn = $(item);
-			var id = $btn.data().id;
+			//console.log($btn);
+
+			var idAndType = _getIdAndType(String($btn.data().reiFavorite));
+			var id = idAndType.id;
 			var exists = favorites.isFavorite(id);
+			var btnHasEvents = $btn.hasClass('brei-has-events');
+
+			// console.group('idAndType');
+			// console.info(idAndType);
+			// console.groupEnd();
+			// console.info('id: ' + id);
+			// console.info('exists: ' + exists);
 
 			if (exists) {
 
@@ -49,71 +64,128 @@ var breilabs = breilabs || {};
 			}
 
 			// add the click action and remove the disabled class
-			$btn.on('click', function (event) {
+			if (btnHasEvents !== true) {
 
-				var $this = $(this);
-				var id = $this.data().id;
-				var isFavorite = favorites.isFavorite(id);
+				//console.info('Adding the click action');
 
-				if (isFavorite) {
+				$btn.on('click', function (event) {
 
-					// if this is already a favorite, remove it
-					favorites.removeFavorite(id).then(function (data) {
+					var $this = $(this);
 
-						if (data === 'success=true') {
+					var idAndType = _getIdAndType(String($this.data().reiFavorite));
+					var id = idAndType.id;
+					var type = idAndType.type;
 
-							$this.removeClass(_isFavoriteClass);
+					// var id = indexOfType === -1 ? reiFavorite : reiFavorite.substr(0, indexOfType - 1);
+					// var type = indexOfType === -1 ? 0 : reiFavorite.substr(indexOfType + 5, 1);
 
-							_removeFavoriteFromArray(id);
-							_updateStatus();
+					var isFavorite = favorites.isFavorite(id);
 
-							if (_favoriteToggleFunc) {
-								_favoriteToggleFunc.call(undefined, REMOVED_STATUS, $this);
+					// console.group('favorite');
+					// console.info('id: ' + id);
+					// console.info('type: ' + type);
+					// console.info('isFavorite: ' + isFavorite);
+
+					if (isFavorite) {
+
+						//console.info('This is already a favorite so it will be removed')
+
+						// if this is already a favorite, remove it
+						favorites.removeFavorite(id, type).then(function (data) {
+
+							//console.info(data);
+
+							if (data === 'success=true') {
+
+								$this.removeClass(_isFavoriteClass);
+
+								_removeFavoriteFromArray(id);
+								_updateStatus();
+
+								if (_favoriteToggleFunc) {
+									_favoriteToggleFunc.call(undefined, REMOVED_STATUS, $this);
+								}
+
+							} else {
+								window.alert('There was an error removing your favorite. Please try again.');
 							}
 
-						} else {
+						}, function (error) {
 							window.alert('There was an error removing your favorite. Please try again.');
-						}
+							console.error(error);
+						});
 
-					}, function (error) {
-						window.alert('There was an error removing your favorite. Please try again.');
-						console.error(error);
-					});
+					} else {
 
-				} else {
+						//console.info('This is not yet a favorite so it will be added');
 
-					// if it's already not a favorite, add it
-					favorites.addFavorite(id).then(function (data) {
+						// if it's already not a favorite, add it
+						favorites.addFavorite(id, type).then(function (data) {
 
-						if (data === 'success=true') {
+							if (data === 'success=true' || data === 'success=exists') {
 
-							$this.addClass(_isFavoriteClass);
+								//console.info(data);
 
-							_favoritesArray.push({ID: id});
-							_updateStatus();
+								$this.addClass(_isFavoriteClass);
 
-							if (_favoriteToggleFunc) {
-								_favoriteToggleFunc.call(undefined, ADDED_STATUS, $this);
+								_favoritesArray.push({ID: id});
+								_updateStatus();
+
+								if (_favoriteToggleFunc) {
+									_favoriteToggleFunc.call(undefined, ADDED_STATUS, $this);
+								}
+
+							} else {
+								window.alert('There was an error adding your favorite. Please try again.');
 							}
 
-						} else {
+						}, function (error) {
 							window.alert('There was an error adding your favorite. Please try again.');
-						}
+							console.error(error);
+						});
 
-					}, function (error) {
-						window.alert('There was an error adding your favorite. Please try again.');
-						console.error(error);
-					});
+					}
 
-				}
+					//console.groupEnd();
 
-				return false;
+					return false;
 
-			}).removeClass('disabled');
+				}).removeClass('disabled').addClass('brei-has-events');
+
+			}
 
 		});
 
+		//console.groupEnd();
+
 	};
+
+
+	/**
+	 * Returns the ID and type based on the string passed. Events and deals require the type param
+	 */
+	function _getIdAndType(reiFavorite) {
+
+		// console.group('_getIdAndType');
+		// console.log(reiFavorite);
+
+		var indexOfType = reiFavorite.indexOf('type');
+		var id = indexOfType === -1 ? reiFavorite : reiFavorite.substr(0, indexOfType - 1);
+		var type = indexOfType === -1 ? 0 : reiFavorite.substr(indexOfType + 5, 1);
+		var data = {
+			id: id,
+			type: type
+		};
+
+		// console.info('id: ' + id);
+		// console.info('type: ' + type);
+
+		// console.groupEnd();
+
+		return data;
+
+	}
+
 
 	/**
 	 * Removes a favorite from the local array.
@@ -170,9 +242,13 @@ var breilabs = breilabs || {};
 	 */
 	function _getFavorites() {
 
+		_loadingFavorites = true;
+
 		favorites.getFavorites().then(function (data) {
 
 			var favoriteItem = data.ArrayOfFavoriteItem.FavoriteItem;
+
+			_loadingFavorites = false;
 
 			// the json that comes back can be dodgy. First check to see if ArrayOfFavoriteItem.FavoriteItem even exists
 			if (typeof favoriteItem !== 'undefined') {
@@ -256,14 +332,16 @@ var breilabs = breilabs || {};
 	/**
    	 * will add a favorite and set the button's class
    	 */
-   	favorites.addFavorite = function(id) {
+   	favorites.addFavorite = function(id, type) {
 
 		var promise = $.ajax({
 			url: _apiRoot + _saveApiUrl,
 			data: {
-				itemid: id
+				itemid: id,
+				type: type
 			}
 		});
+
    		return promise;
 
    	};
@@ -271,14 +349,16 @@ var breilabs = breilabs || {};
   	/**
    	 * Removes a favorite and sets the button's class appropriately
    	 */
-	favorites.removeFavorite = function(id) {
+	favorites.removeFavorite = function(id, type) {
 
 		var promise = $.ajax({
 			url: _apiRoot + _removeApiUrl,
 			data: {
-				itemid: id
+				itemid: id,
+				type: type
 			}
 		});
+
    		return promise;
 
    	};
@@ -315,6 +395,24 @@ var breilabs = breilabs || {};
    		}
 
    		return isFavorite;
+
+	};
+
+	/**
+	 * Adds UI actions when the screen changes
+	 *	todo: make the check for if the favorites loaded better
+	 */
+	favorites.rebuild = function() {
+
+		// console.group('favorites.rebuild');
+		// console.info('favorites loaded: ' + _favoritesArray.length > 0 ? true : false);
+		// console.info('_loadingFavorites: ' + _loadingFavorites);
+
+		if (_loadingFavorites === false) {
+			_addUiEvents();
+		}
+
+		//console.groupEnd();
 
 	};
 
